@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">AndroidMockGramm</string>
     <string name="error_no_camera_permission">There is no permission for work with camera!</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

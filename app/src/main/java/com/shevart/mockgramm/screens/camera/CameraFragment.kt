@@ -1,38 +1,40 @@
-package com.shevart.mockgramm.test.camera
+package com.shevart.mockgramm.screens.camera
 
 import android.Manifest
 import android.os.Bundle
+import android.view.View
 import com.shevart.mockgramm.R
-import com.shevart.mockgramm.base.BaseActivity
+import com.shevart.mockgramm.base.BaseFragment
 import com.shevart.mockgramm.core.CameraEngine
 import com.shevart.mockgramm.core.CameraEngineCallback
+import com.shevart.mockgramm.core.util.changeCamera
 import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.CameraPermission
 import com.shevart.mockgramm.util.WriteStoragePermission
 import kotlinx.android.synthetic.main.activity_test_camera.*
+import kotlinx.android.synthetic.main.layout_camera_dashboard.*
 
-// todo remove str hardcodes
-class TestCameraActivity : BaseActivity(), CameraEngineCallback {
+class CameraFragment : BaseFragment(), CameraEngineCallback {
     private lateinit var cameraEngine: CameraEngine
 
-    override fun provideLayoutResId() = R.layout.activity_test_camera
+    override fun provideLayoutResId() = R.layout.fragment_camera
 
-    override fun getScreenRotation() = this.provideScreenRotation()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        cameraEngine = CameraEngine
-                .createCameraEngineInstance(textureView = txvCameraImage,
-                        cameraEngineCallback = this,
-                        lifecycleOwner = this)
+        cameraEngine = CameraEngine.createCameraEngineInstance(
+                textureView = txvCameraImage,
+                cameraEngineCallback = this,
+                lifecycleOwner = this)
 
-        btTest.setOnClickListener {
-            cameraEngine.shootPhoto()
-        }
+        ibShoot.setOnClickListener { cameraEngine.shootPhoto() }
+        ivChangeCamera.setOnClickListener { cameraEngine.changeCamera() }
     }
 
-    override fun isCameraPermissionGranted(): Boolean =
-            CameraPermission.isGranted(this)
+    override fun getScreenRotation() = provideScreenRotation()
+
+    override fun isCameraPermissionGranted() =
+            CameraPermission.isGranted(forceContext)
 
     override fun requestCameraPermission() {
         rxPermission
@@ -43,7 +45,7 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     }
 
     override fun isStoragePermissionGranted() =
-            WriteStoragePermission.isGranted(this)
+            WriteStoragePermission.isGranted(forceContext)
 
     override fun requestStoragePermission() {
         rxPermission
@@ -78,11 +80,15 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     private fun onPermissionNotGranted(withFinish: Boolean = true) {
         showToast(R.string.error_no_camera_permission)
         if (withFinish) {
-            finish()
+            activity?.finish()
         }
     }
 
     private fun onRequestPermissionError(e: Throwable) {
         handleErrorDefault(e)
+    }
+
+    companion object {
+        fun getInstance() = CameraFragment()
     }
 }

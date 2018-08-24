@@ -1,7 +1,7 @@
-package com.shevart.mockgramm.camera.util
+package com.shevart.mockgramm.core.util
 
-import com.shevart.mockgramm.camera.CameraEngine
-import com.shevart.mockgramm.camera.Cameras
+import com.shevart.mockgramm.core.CameraEngine
+import com.shevart.mockgramm.core.Cameras
 
 fun CameraEngine.changeCamera() {
     val currCamera = this.getCurrentCameraType()

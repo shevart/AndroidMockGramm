@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.camera
+package com.shevart.mockgramm.core
 
 interface CameraEngineCallback {
     fun isCameraPermissionGranted(): Boolean

@@ -12,7 +12,7 @@
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_margin="32dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/selector_shoot_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

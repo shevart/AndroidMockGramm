@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.shevart.mockgramm.camera.util
+package com.shevart.mockgramm.core.util
 
 import android.hardware.camera2.*
 import android.view.Surface

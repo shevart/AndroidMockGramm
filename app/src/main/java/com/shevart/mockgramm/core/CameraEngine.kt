@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.camera
+package com.shevart.mockgramm.core
 
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
@@ -17,7 +17,7 @@ import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
-import com.shevart.mockgramm.camera.util.*
+import com.shevart.mockgramm.core.util.*
 import com.shevart.mockgramm.test.camera.TestCameraActivity
 import java.io.*
 import java.util.ArrayList
@@ -204,7 +204,7 @@ class CameraEngine private constructor(
 
     private fun startBackgroundThread() {
         log("startBackgroundThread()")
-        backgroundThread = HandlerThread(TestCameraActivity.CAMERA_THREAD_NAME)
+        backgroundThread = HandlerThread(CAMERA_THREAD_NAME)
         backgroundThread?.start()
         backgroundHandler = Handler(backgroundThread!!.looper)
     }
@@ -221,6 +221,7 @@ class CameraEngine private constructor(
         }
     }
 
+    // todo refactor!
     private fun takePicture(cameraDevice: CameraDevice) {
         if (!isCameraOpened()) {
             log("cameraDevice is null")
@@ -316,6 +317,8 @@ class CameraEngine private constructor(
             cameraEngineCallback.cameraDevMessage(msg)
 
     companion object {
+        const val CAMERA_THREAD_NAME = "Camera Background"
+
         fun createCameraEngineInstance(textureView: TextureView,
                                        cameraEngineCallback: CameraEngineCallback,
                                        lifecycleOwner: LifecycleOwner): CameraEngine {

@@ -1,11 +1,11 @@
-package com.shevart.mockgramm.camera.util
+package com.shevart.mockgramm.core.util
 
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.media.ImageReader
-import com.shevart.mockgramm.camera.CameraConfig
+import com.shevart.mockgramm.core.CameraConfig
 
 fun CameraCharacteristics.getImageSizes(): Pair<Int, Int> {
     val jpegSizes = this.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
