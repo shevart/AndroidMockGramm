@@ -22,6 +22,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 @Suppress("unused")
+// todo refactor - should be more readable
 class CameraEngine private constructor(
         private val textureView: TextureView,
         private val cameraEngineCallback: CameraEngineCallback
@@ -218,9 +219,6 @@ class CameraEngine private constructor(
 
     private fun log(msg: String, toast: Boolean = true) {
         Log.d("CameraEngine", msg)
-        if (toast) {
-            showToast(msg)
-        }
     }
 
     private fun showToast(msg: String) =
