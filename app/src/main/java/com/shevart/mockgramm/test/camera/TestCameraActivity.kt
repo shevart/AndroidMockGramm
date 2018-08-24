@@ -13,11 +13,13 @@ import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseActivity
-import com.shevart.mockgramm.camera.EmptyTextureSurfaceListener
+import com.shevart.mockgramm.camera.CameraEngineCallback
+import com.shevart.mockgramm.camera.util.EmptyTextureSurfaceListener
+import com.shevart.mockgramm.util.CameraPermission
 import kotlinx.android.synthetic.main.activity_test_camera.*
 import java.util.*
 
-class TestCameraActivity : BaseActivity() {
+class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     // Camera related fields
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
@@ -51,6 +53,8 @@ class TestCameraActivity : BaseActivity() {
 
     override fun provideLayoutResId() = R.layout.activity_test_camera
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -72,6 +76,17 @@ class TestCameraActivity : BaseActivity() {
         stopBackgroundThread()
     }
 
+    override fun isCameraPermissionGranted(): Boolean =
+            CameraPermission.isNeedRequest(this)
+
+    override fun requestCameraPermission() {
+        rxPermission
+                .request(Manifest.permission.CAMERA)
+                .subscribe(
+                        this::onRequestPermissionResult,
+                        this::onRequestPermissionError)
+    }
+
     private fun startCamera() {
         rxPermission
                 .request(Manifest.permission.CAMERA)
@@ -82,7 +97,8 @@ class TestCameraActivity : BaseActivity() {
 
     private fun onRequestPermissionResult(granted: Boolean) {
         if (granted) {
-            openCamera()
+            showToast("RequestPermissionResult - granted!")
+//            openCamera()
         } else {
             showToast("There is no permission for work with camera!")
             finish()
@@ -98,10 +114,11 @@ class TestCameraActivity : BaseActivity() {
     // todo - check is permission granted?
     // todo - use only back camera
     private fun openCamera() {
+        log("openCamera()")
         showToast("openCamera()")
         val manager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
-            cameraId = manager.cameraIdList[0]
+            cameraId = manager.findMainCameraId()
             val characteristics = manager.getCameraCharacteristics(cameraId!!)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
@@ -111,6 +128,20 @@ class TestCameraActivity : BaseActivity() {
             e.printStackTrace()
         }
     }
+
+    private fun CameraManager.findMainCameraId(): String? {
+        for (cameraId in this.cameraIdList.toList()) {
+            val characteristics = this.getCameraCharacteristics(cameraId)
+            val mainCamera = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK
+            log("CAMERA_ID=$cameraId, mainCamera=$mainCamera")
+            if (mainCamera) {
+                return cameraId
+            }
+        }
+        return null
+    }
+
+
 
 
     private fun createCameraPreview() {

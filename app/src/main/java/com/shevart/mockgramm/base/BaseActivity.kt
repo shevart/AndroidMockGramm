@@ -34,10 +34,10 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun log(msg: String) {
-        log(msg = msg)
+        log(tag = this::class.java.simpleName, msg = msg)
     }
 
-    protected fun log(tag: String = this::class.java.simpleName, msg: String) {
+    protected fun log(tag: String, msg: String) {
         Log.d(tag, msg)
     }
 }

@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.camera
+package com.shevart.mockgramm.camera.util
 
 import android.graphics.SurfaceTexture
 import android.view.TextureView
