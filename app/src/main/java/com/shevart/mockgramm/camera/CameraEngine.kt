@@ -6,18 +6,23 @@ import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.OnLifecycleEvent
 import android.content.Context
+import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.media.Image
+import android.media.ImageReader
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
+import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
-import com.shevart.mockgramm.camera.util.EmptyTextureSurfaceListener
-import com.shevart.mockgramm.camera.util.findMainCameraId
-import com.shevart.mockgramm.camera.util.findSelfieCameraId
+import com.shevart.mockgramm.camera.util.*
 import com.shevart.mockgramm.test.camera.TestCameraActivity
+import java.io.*
+import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -33,6 +38,16 @@ class CameraEngine private constructor(
     private var imageDimension: Size? = null
     private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var cameraCaptureSessions: CameraCaptureSession? = null
+
+    @Suppress("PrivatePropertyName")
+    private val ORIENTATIONS: SparseIntArray by lazy {
+        SparseIntArray().apply {
+            append(Surface.ROTATION_0, 90)
+            append(Surface.ROTATION_90, 0)
+            append(Surface.ROTATION_180, 270)
+            append(Surface.ROTATION_270, 180)
+        }
+    }
 
     private val reentrantLock = ReentrantLock()
     private var currentCamera = Cameras.MAIN_CAMERA
@@ -60,6 +75,12 @@ class CameraEngine private constructor(
     }
     private val context: Context
         get() = textureView.context
+    private val cameraManager: CameraManager
+        get() = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    private val cameraPermissionGranted: Boolean
+        get() = cameraEngineCallback.isCameraPermissionGranted()
+    private val storagePermissionGranted: Boolean
+        get() = cameraEngineCallback.isStoragePermissionGranted()
 
     fun changeCamera(camera: Cameras) {
         if (currentCamera != camera) {
@@ -96,7 +117,7 @@ class CameraEngine private constructor(
     }
 
     private fun startCamera() {
-        if (cameraEngineCallback.isCameraPermissionGranted()) {
+        if (cameraPermissionGranted) {
             openCamera()
         } else {
             cameraEngineCallback.requestCameraPermission()
@@ -202,6 +223,94 @@ class CameraEngine private constructor(
         }
     }
 
+    fun shootPhoto() {
+        if (storagePermissionGranted) {
+            val camera = cameraDevice
+                    ?: throw IllegalStateException("You must open cameraDevice!")
+            takePicture(camera)
+        } else {
+            cameraEngineCallback.requestStoragePermission()
+        }
+
+    }
+
+    private fun takePicture(cameraDevice: CameraDevice) {
+        if (!isCameraOpened()) {
+            log("cameraDevice is null")
+            return
+        }
+        try {
+            // Create image reader
+            val reader = cameraManager.createImageReader(cameraDevice)
+            val outputSurfaces = ArrayList<Surface>(2)
+            outputSurfaces.add(reader.surface)
+            outputSurfaces.add(Surface(textureView.surfaceTexture))
+            val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+            captureBuilder.addTarget(reader.surface)
+            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+
+            // Orientation
+            val rotation = cameraEngineCallback.getScreenRotation()
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation))
+
+            // Image file
+            val file = File(Environment.getExternalStorageDirectory().toString() + "/pic.jpg")
+            val readerListener = object : ImageReader.OnImageAvailableListener {
+                override fun onImageAvailable(reader: ImageReader) {
+                    var image: Image? = null
+                    try {
+                        image = reader.acquireLatestImage()
+                        val buffer = image!!.planes[0].buffer
+                        val bytes = ByteArray(buffer.capacity())
+                        buffer.get(bytes)
+                        save(bytes)
+                    } catch (e: FileNotFoundException) {
+                        e.printStackTrace()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    } finally {
+                        image?.close()
+                    }
+                }
+
+                @Throws(IOException::class)
+                private fun save(bytes: ByteArray) {
+                    var output: OutputStream? = null
+                    try {
+                        output = FileOutputStream(file)
+                        output!!.write(bytes)
+                    } finally {
+                        output?.close()
+                    }
+                }
+            }
+            reader.setOnImageAvailableListener(readerListener, backgroundHandler)
+            val captureListener = object : CameraCaptureSession.CaptureCallback() {
+                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+                    super.onCaptureCompleted(session, request, result)
+                    showToast("Saved:$file")
+                    onCameraOpened()
+                }
+            }
+            cameraDevice.createCaptureSession(outputSurfaces, object : CameraCaptureSession.StateCallback() {
+                override fun onConfigured(session: CameraCaptureSession) {
+                    try {
+                        session.capture(captureBuilder.build(), captureListener, backgroundHandler)
+                    } catch (e: CameraAccessException) {
+                        e.printStackTrace()
+                    }
+
+                }
+
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                }
+            }, backgroundHandler)
+        } catch (e: CameraAccessException) {
+            e.printStackTrace()
+        }
+
+    }
+
     private fun createSurface(imageDimension: Size): Surface {
         val texture = textureView.surfaceTexture!!
         texture.setDefaultBufferSize(imageDimension.width, imageDimension.height)
@@ -217,7 +326,7 @@ class CameraEngine private constructor(
         }
     }
 
-    private fun log(msg: String, toast: Boolean = true) {
+    private fun log(msg: String) {
         Log.d("CameraEngine", msg)
     }
 

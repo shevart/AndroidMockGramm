@@ -8,15 +8,28 @@ import android.support.v4.content.ContextCompat
 object CameraPermission {
     fun isGranted(context: Context): Boolean {
         return if (isRuntimePermissionsRequired()) {
-            isCameraPermissionGranted(context)
+            isPermissionGranted(context)
         } else {
             true
         }
     }
 
-    private fun isCameraPermissionGranted(context: Context): Boolean {
-        val permissionCheck = ContextCompat.checkSelfPermission(context,
-                Manifest.permission.CAMERA)
-        return permissionCheck == PackageManager.PERMISSION_GRANTED
-    }
+    private fun isPermissionGranted(context: Context) =
+            context.isPermissionGranted(Manifest.permission.CAMERA)
 }
+
+object WriteStoragePermission {
+    fun isGranted(context: Context): Boolean {
+        return if (isRuntimePermissionsRequired()) {
+            isPermissionGranted(context)
+        } else {
+            true
+        }
+    }
+
+    private fun isPermissionGranted(context: Context) =
+            context.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+}
+
+fun Context.isPermissionGranted(permission: String) =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
