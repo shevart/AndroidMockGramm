@@ -63,13 +63,13 @@ class CameraFragment : BaseFragment(), CameraEngineCallback {
     }
 
     override fun onShootPhotoStarted() {
-//        pbShootingProgress.visible()
-//        ibShoot.disable()
+        pbShootingProgress.visible()
+        ibShoot.disable()
     }
 
     override fun onShootPhotoFinish() {
-//        pbShootingProgress.gone()
-//        ibShoot.enable()
+        pbShootingProgress.gone()
+        ibShoot.enable()
     }
 
     // todo update camera?

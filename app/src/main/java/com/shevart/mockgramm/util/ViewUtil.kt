@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.shevart.mockgramm.util
 
 import android.view.View

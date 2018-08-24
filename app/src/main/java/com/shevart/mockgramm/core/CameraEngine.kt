@@ -13,6 +13,7 @@ import android.media.ImageReader
 import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
 import android.util.Log
 import android.util.Size
 import android.view.Surface
@@ -40,6 +41,7 @@ class CameraEngine private constructor(
 
     private val reentrantLock = ReentrantLock()
     private var currentCamera = Cameras.MAIN_CAMERA
+    private val handler = Handler(Looper.getMainLooper())
 
     private val textureListener = object : EmptyTextureSurfaceListener() {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
@@ -276,21 +278,19 @@ class CameraEngine private constructor(
                                                 result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
                     showDevToast("Saved:$file")
-                    cameraEngineCallback.onShootPhotoFinish()
+                    onCameraShootPhotoFinished()
                     onCameraOpened()
                 }
             }
             cameraDevice.createCaptureSession(outputSurfaces, object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
                     try {
-                        cameraEngineCallback.onShootPhotoStarted()
+                        onCameraShootPhotoStarted()
                         session.capture(captureRequest, captureListener, backgroundHandler)
                     } catch (e: CameraAccessException) {
-                        cameraEngineCallback.onCameraError(e)
-                        cameraEngineCallback.onShootPhotoFinish()
+                        onCameraShootPhotoFailed(e)
                     } catch (another: Exception) {
-                        cameraEngineCallback.onCameraError(another)
-                        cameraEngineCallback.onShootPhotoFinish()
+                        onCameraShootPhotoFailed(another)
                     }
                 }
 
@@ -300,6 +300,21 @@ class CameraEngine private constructor(
             }, backgroundHandler)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun onCameraShootPhotoStarted() {
+        runOnMainThread { cameraEngineCallback.onShootPhotoStarted() }
+    }
+
+    private fun onCameraShootPhotoFinished() {
+        runOnMainThread { cameraEngineCallback.onShootPhotoFinish() }
+    }
+
+    private fun onCameraShootPhotoFailed(e: Exception) {
+        runOnMainThread {
+            cameraEngineCallback.onCameraError(e)
+            cameraEngineCallback.onShootPhotoFinish()
         }
     }
 
@@ -316,6 +331,10 @@ class CameraEngine private constructor(
             cameraEngineCallback.onCameraError(e)
             throw RuntimeException("Interrupted!")
         }
+    }
+
+    private fun runOnMainThread(action: () -> Unit) {
+        handler.post { action() }
     }
 
     private fun log(msg: String) {
