@@ -2,8 +2,8 @@
 
 package com.shevart.mockgramm.camera.util
 
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
+import android.hardware.camera2.*
+import android.view.Surface
 
 fun CameraManager.findMainCameraId(): String? {
     return this.findCameraIdByLensFacing(CameraCharacteristics.LENS_FACING_BACK)
@@ -21,4 +21,14 @@ fun CameraManager.findCameraIdByLensFacing(cameraFacing: Int): String? {
         }
     }
     return null
+}
+
+fun CameraDevice.createCaptureRequest(target: Surface, rotation: Int): CaptureRequest {
+    val captureBuilder = this.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+    captureBuilder.apply {
+        addTarget(target)
+        set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+        set(CaptureRequest.JPEG_ORIENTATION, rotation)
+    }
+    return captureBuilder.build()
 }

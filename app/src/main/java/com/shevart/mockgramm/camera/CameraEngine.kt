@@ -15,7 +15,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
-import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.camera.util.*
@@ -41,7 +40,7 @@ class CameraEngine private constructor(
     private val reentrantLock = ReentrantLock()
     private var currentCamera = Cameras.MAIN_CAMERA
 
-    private val textureListener: TextureView.SurfaceTextureListener = object : EmptyTextureSurfaceListener() {
+    private val textureListener = object : EmptyTextureSurfaceListener() {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
             startCameraEngine()
         }
@@ -89,7 +88,6 @@ class CameraEngine private constructor(
         } else {
             cameraEngineCallback.requestStoragePermission()
         }
-
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -153,7 +151,6 @@ class CameraEngine private constructor(
         return cameraId ?: throw IllegalAccessError("The camera not found!")
     }
 
-
     private fun closeCamera() {
         runThreadSafely { cameraDevice?.close() }
     }
@@ -195,7 +192,8 @@ class CameraEngine private constructor(
         if (isCameraOpened()) {
             captureRequestBuilder?.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
             try {
-                cameraCaptureSessions?.setRepeatingRequest(captureRequestBuilder!!.build(), null, backgroundHandler)
+                cameraCaptureSessions?.setRepeatingRequest(
+                        captureRequestBuilder!!.build(), null, backgroundHandler)
             } catch (e: CameraAccessException) {
                 cameraEngineCallback.onCameraError(e)
             }
@@ -234,13 +232,8 @@ class CameraEngine private constructor(
             val outputSurfaces = ArrayList<Surface>(2)
             outputSurfaces.add(reader.surface)
             outputSurfaces.add(Surface(textureView.surfaceTexture))
-            val captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-            captureBuilder.addTarget(reader.surface)
-            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
-
-            // Orientation
-            val rotation = cameraEngineCallback.getScreenRotation()
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation))
+            val rotation = ORIENTATIONS.get(cameraEngineCallback.getScreenRotation())
+            val captureRequest = cameraDevice.createCaptureRequest(reader.surface, rotation)
 
             // Image file
             val file = File(Environment.getExternalStorageDirectory().toString() + "/pic.jpg")
@@ -267,7 +260,7 @@ class CameraEngine private constructor(
                     var output: OutputStream? = null
                     try {
                         output = FileOutputStream(file)
-                        output!!.write(bytes)
+                        output.write(bytes)
                     } finally {
                         output?.close()
                     }
@@ -275,7 +268,8 @@ class CameraEngine private constructor(
             }
             reader.setOnImageAvailableListener(readerListener, backgroundHandler)
             val captureListener = object : CameraCaptureSession.CaptureCallback() {
-                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
+                                                result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
                     showDevToast("Saved:$file")
                     onCameraOpened()
@@ -284,7 +278,7 @@ class CameraEngine private constructor(
             cameraDevice.createCaptureSession(outputSurfaces, object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
                     try {
-                        session.capture(captureBuilder.build(), captureListener, backgroundHandler)
+                        session.capture(captureRequest, captureListener, backgroundHandler)
                     } catch (e: CameraAccessException) {
                         e.printStackTrace()
                     }
@@ -297,7 +291,6 @@ class CameraEngine private constructor(
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
-
     }
 
     private fun createSurface(imageDimension: Size): Surface {
