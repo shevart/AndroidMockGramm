@@ -6,6 +6,7 @@ import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseActivity
 import com.shevart.mockgramm.camera.CameraEngine
 import com.shevart.mockgramm.camera.CameraEngineCallback
+import com.shevart.mockgramm.camera.Cameras
 import com.shevart.mockgramm.util.CameraPermission
 import kotlinx.android.synthetic.main.activity_test_camera.*
 
@@ -20,6 +21,15 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
                 .createCameraEngineInstance(textureView = txvCameraImage,
                         cameraEngineCallback = this,
                         lifecycleOwner = this)
+
+        btTest.setOnClickListener {
+            val currCamera = cameraEngine.getCurrentCameraType()
+            if (currCamera == Cameras.MAIN_CAMERA) {
+                cameraEngine.changeCamera(Cameras.SELFIE_CAMERA)
+            } else {
+                cameraEngine.changeCamera(Cameras.MAIN_CAMERA)
+            }
+        }
     }
 
     override fun isCameraPermissionGranted(): Boolean =

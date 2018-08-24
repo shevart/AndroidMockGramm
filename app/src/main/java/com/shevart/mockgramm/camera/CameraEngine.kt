@@ -16,13 +16,12 @@ import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.camera.util.EmptyTextureSurfaceListener
 import com.shevart.mockgramm.camera.util.findMainCameraId
+import com.shevart.mockgramm.camera.util.findSelfieCameraId
 import com.shevart.mockgramm.test.camera.TestCameraActivity
-import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 @Suppress("unused")
-// todo refactor it!
 class CameraEngine private constructor(
         private val textureView: TextureView,
         private val cameraEngineCallback: CameraEngineCallback
@@ -33,7 +32,10 @@ class CameraEngine private constructor(
     private var imageDimension: Size? = null
     private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var cameraCaptureSessions: CameraCaptureSession? = null
+
     private val reentrantLock = ReentrantLock()
+    private var currentCamera = Cameras.MAIN_CAMERA
+
     private val textureListener: TextureView.SurfaceTextureListener = object : EmptyTextureSurfaceListener() {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
             startCamera()
@@ -55,9 +57,18 @@ class CameraEngine private constructor(
             closeCamera()
         }
     }
-
     private val context: Context
         get() = textureView.context
+
+    fun changeCamera(camera: Cameras) {
+        if (currentCamera != camera) {
+            stopCameraEngine()
+            currentCamera = camera
+            startCameraEngine()
+        }
+    }
+
+    fun getCurrentCameraType() = currentCamera
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onHostCreated() {
@@ -66,18 +77,21 @@ class CameraEngine private constructor(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onHostResumed() {
+        startCameraEngine()
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    private fun onHostPaused() {
+        stopCameraEngine()
+    }
+
+    private fun startCameraEngine() {
         startBackgroundThread()
         if (textureView.isAvailable) {
             openCamera()
         } else {
             textureView.surfaceTextureListener = textureListener
         }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    private fun onHostPaused() {
-        closeCamera()
-        stopBackgroundThread()
     }
 
     private fun startCamera() {
@@ -88,13 +102,16 @@ class CameraEngine private constructor(
         }
     }
 
+    private fun stopCameraEngine() {
+        closeCamera()
+        stopBackgroundThread()
+    }
+
     @SuppressLint("MissingPermission")
     private fun openCamera() {
         val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
-            val cameraId = manager.findMainCameraId()
-                    ?: throw IllegalAccessError("The camera not found!")
-
+            val cameraId = findCurrentCameraId(manager)
             val characteristics = manager.getCameraCharacteristics(cameraId)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
@@ -105,6 +122,15 @@ class CameraEngine private constructor(
             cameraEngineCallback.onCameraError(e)
         }
     }
+
+    private fun findCurrentCameraId(manager: CameraManager): String {
+        val cameraId = when (currentCamera) {
+            Cameras.MAIN_CAMERA -> manager.findMainCameraId()
+            Cameras.SELFIE_CAMERA -> manager.findSelfieCameraId()
+        }
+        return cameraId ?: throw IllegalAccessError("The camera not found!")
+    }
+
 
     private fun closeCamera() {
         runThreadSafely { cameraDevice?.close() }
@@ -181,7 +207,7 @@ class CameraEngine private constructor(
         return Surface(texture)
     }
 
-    private fun runThreadSafely(action:() -> Unit) {
+    private fun runThreadSafely(action: () -> Unit) {
         try {
             reentrantLock.withLock { action() }
         } catch (e: InterruptedException) {
