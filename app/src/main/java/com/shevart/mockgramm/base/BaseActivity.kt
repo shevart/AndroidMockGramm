@@ -2,6 +2,7 @@ package com.shevart.mockgramm.base
 
 import android.os.Bundle
 import android.support.annotation.LayoutRes
+import android.support.annotation.StringRes
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
@@ -26,6 +27,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    protected fun showToast(@StringRes msgResId: Int) {
+        Toast.makeText(this, msgResId, Toast.LENGTH_SHORT).show()
     }
 
     protected fun handleErrorDefault(e: Throwable) {

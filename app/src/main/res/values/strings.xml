@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AndroidMockGramm</string>
+    <string name="error_no_camera_permission">There is no permission for work with camera!</string>
 </resources>

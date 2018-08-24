@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.activity_test_camera.*
 class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     private lateinit var cameraEngine: CameraEngine
 
-
     override fun provideLayoutResId() = R.layout.activity_test_camera
 
     override fun getScreenRotation() = this.provideScreenRotation()
@@ -78,7 +77,7 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     }
 
     private fun onPermissionNotGranted(withFinish: Boolean = true) {
-        showToast("There is no permission for work with camera!")
+        showToast(R.string.error_no_camera_permission)
         if (withFinish) {
             finish()
         }
@@ -86,15 +85,6 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
 
     private fun onRequestPermissionError(e: Throwable) {
         handleErrorDefault(e)
-    }
-
-    private fun changeCamera() {
-        val currCamera = cameraEngine.getCurrentCameraType()
-        if (currCamera == Cameras.MAIN_CAMERA) {
-            cameraEngine.changeCamera(Cameras.SELFIE_CAMERA)
-        } else {
-            cameraEngine.changeCamera(Cameras.MAIN_CAMERA)
-        }
     }
 
     companion object {

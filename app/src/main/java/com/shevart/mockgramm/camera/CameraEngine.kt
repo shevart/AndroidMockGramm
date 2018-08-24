@@ -6,7 +6,6 @@ import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.OnLifecycleEvent
 import android.content.Context
-import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.Image
@@ -26,7 +25,7 @@ import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-@Suppress("unused")
+@Suppress("unused", "PrivatePropertyName")
 // todo refactor - should be more readable
 class CameraEngine private constructor(
         private val textureView: TextureView,
@@ -38,16 +37,6 @@ class CameraEngine private constructor(
     private var imageDimension: Size? = null
     private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var cameraCaptureSessions: CameraCaptureSession? = null
-
-    @Suppress("PrivatePropertyName")
-    private val ORIENTATIONS: SparseIntArray by lazy {
-        SparseIntArray().apply {
-            append(Surface.ROTATION_0, 90)
-            append(Surface.ROTATION_90, 0)
-            append(Surface.ROTATION_180, 270)
-            append(Surface.ROTATION_270, 180)
-        }
-    }
 
     private val reentrantLock = ReentrantLock()
     private var currentCamera = Cameras.MAIN_CAMERA
@@ -91,6 +80,17 @@ class CameraEngine private constructor(
     }
 
     fun getCurrentCameraType() = currentCamera
+
+    fun shootPhoto() {
+        if (storagePermissionGranted) {
+            val camera = cameraDevice
+                    ?: throw IllegalStateException("You must open cameraDevice!")
+            takePicture(camera)
+        } else {
+            cameraEngineCallback.requestStoragePermission()
+        }
+
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onHostCreated() {
@@ -181,7 +181,7 @@ class CameraEngine private constructor(
                 }
 
                 override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
-                    showToast("onConfigureFailed - Configuration changed!")
+                    showDevToast("onConfigureFailed - Configuration changed!")
                 }
             }, null)
         } catch (e: CameraAccessException) {
@@ -221,17 +221,6 @@ class CameraEngine private constructor(
         } catch (e: InterruptedException) {
             cameraEngineCallback.onCameraError(e)
         }
-    }
-
-    fun shootPhoto() {
-        if (storagePermissionGranted) {
-            val camera = cameraDevice
-                    ?: throw IllegalStateException("You must open cameraDevice!")
-            takePicture(camera)
-        } else {
-            cameraEngineCallback.requestStoragePermission()
-        }
-
     }
 
     private fun takePicture(cameraDevice: CameraDevice) {
@@ -288,7 +277,7 @@ class CameraEngine private constructor(
             val captureListener = object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
-                    showToast("Saved:$file")
+                    showDevToast("Saved:$file")
                     onCameraOpened()
                 }
             }
@@ -330,7 +319,7 @@ class CameraEngine private constructor(
         Log.d("CameraEngine", msg)
     }
 
-    private fun showToast(msg: String) =
+    private fun showDevToast(msg: String) =
             cameraEngineCallback.cameraDevMessage(msg)
 
     companion object {
