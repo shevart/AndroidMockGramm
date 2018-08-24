@@ -14,4 +14,8 @@ interface CameraEngineCallback {
     fun cameraDevMessage(msg: String)
 
     fun getScreenRotation(): Int
+
+    fun onShootPhotoStarted()
+
+    fun onShootPhotoFinish()
 }

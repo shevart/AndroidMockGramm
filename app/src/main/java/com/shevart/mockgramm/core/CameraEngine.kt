@@ -26,6 +26,7 @@ import kotlin.concurrent.withLock
 
 @Suppress("unused", "PrivatePropertyName")
 // todo refactor - should be more readable
+// todo add comment
 class CameraEngine private constructor(
         private val textureView: TextureView,
         private val cameraEngineCallback: CameraEngineCallback
@@ -84,7 +85,9 @@ class CameraEngine private constructor(
         if (storagePermissionGranted) {
             val camera = cameraDevice
                     ?: throw IllegalStateException("You must open cameraDevice!")
-            takePicture(camera)
+            synchronized(this) {
+                takePicture(camera)
+            }
         } else {
             cameraEngineCallback.requestStoragePermission()
         }
@@ -273,20 +276,26 @@ class CameraEngine private constructor(
                                                 result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
                     showDevToast("Saved:$file")
+                    cameraEngineCallback.onShootPhotoFinish()
                     onCameraOpened()
                 }
             }
             cameraDevice.createCaptureSession(outputSurfaces, object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
                     try {
+                        cameraEngineCallback.onShootPhotoStarted()
                         session.capture(captureRequest, captureListener, backgroundHandler)
                     } catch (e: CameraAccessException) {
-                        e.printStackTrace()
+                        cameraEngineCallback.onCameraError(e)
+                        cameraEngineCallback.onShootPhotoFinish()
+                    } catch (another: Exception) {
+                        cameraEngineCallback.onCameraError(another)
+                        cameraEngineCallback.onShootPhotoFinish()
                     }
-
                 }
 
                 override fun onConfigureFailed(session: CameraCaptureSession) {
+                    cameraEngineCallback.onShootPhotoFinish()
                 }
             }, backgroundHandler)
         } catch (e: CameraAccessException) {

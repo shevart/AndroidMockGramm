@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     tools:background="@android:color/black">
 
-    <android.support.v7.widget.AppCompatImageButton
-        android:id="@+id/ibShoot"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center_horizontal|bottom"
+    <FrameLayout
+        android:id="@+id/flShootWrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="32dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/selector_shoot_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/ibShoot"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:background="@drawable/selector_shoot_button" />
+
+        <ProgressBar
+            android:id="@+id/pbShootingProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/ivChangeCamera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ibShoot"
+        app:layout_constraintBottom_toBottomOf="@+id/flShootWrapper"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ibShoot"
-        app:layout_constraintTop_toTopOf="@+id/ibShoot"
+        app:layout_constraintStart_toEndOf="@+id/flShootWrapper"
+        app:layout_constraintTop_toTopOf="@+id/flShootWrapper"
         app:srcCompat="@drawable/ic_loop_white" />
 
 </android.support.constraint.ConstraintLayout>

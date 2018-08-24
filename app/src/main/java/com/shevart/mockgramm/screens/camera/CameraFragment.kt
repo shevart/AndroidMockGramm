@@ -9,8 +9,7 @@ import com.shevart.mockgramm.core.CameraEngine
 import com.shevart.mockgramm.core.CameraEngineCallback
 import com.shevart.mockgramm.core.util.changeCamera
 import com.shevart.mockgramm.core.util.provideScreenRotation
-import com.shevart.mockgramm.util.CameraPermission
-import com.shevart.mockgramm.util.WriteStoragePermission
+import com.shevart.mockgramm.util.*
 import kotlinx.android.synthetic.main.activity_test_camera.*
 import kotlinx.android.synthetic.main.layout_camera_dashboard.*
 
@@ -61,6 +60,16 @@ class CameraFragment : BaseFragment(), CameraEngineCallback {
 
     override fun cameraDevMessage(msg: String) {
         showToast(msg)
+    }
+
+    override fun onShootPhotoStarted() {
+//        pbShootingProgress.visible()
+//        ibShoot.disable()
+    }
+
+    override fun onShootPhotoFinish() {
+//        pbShootingProgress.gone()
+//        ibShoot.enable()
     }
 
     // todo update camera?

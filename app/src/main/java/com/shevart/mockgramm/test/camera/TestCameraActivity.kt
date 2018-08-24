@@ -13,6 +13,14 @@ import kotlinx.android.synthetic.main.activity_test_camera.*
 
 // todo remove str hardcodes
 class TestCameraActivity : BaseActivity(), CameraEngineCallback {
+    override fun onShootPhotoStarted() {
+        TODO()
+    }
+
+    override fun onShootPhotoFinish() {
+        TODO()
+    }
+
     private lateinit var cameraEngine: CameraEngine
 
     override fun provideLayoutResId() = R.layout.activity_test_camera
