@@ -17,10 +17,12 @@ import android.view.TextureView
 import com.shevart.mockgramm.camera.util.EmptyTextureSurfaceListener
 import com.shevart.mockgramm.camera.util.findMainCameraId
 import com.shevart.mockgramm.test.camera.TestCameraActivity
-import kotlinx.android.synthetic.main.activity_test_camera.*
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 @Suppress("unused")
+// todo refactor it!
 class CameraEngine private constructor(
         private val textureView: TextureView,
         private val cameraEngineCallback: CameraEngineCallback
@@ -28,12 +30,10 @@ class CameraEngine private constructor(
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
     private var cameraDevice: CameraDevice? = null
-    private var cameraId: String? = null
     private var imageDimension: Size? = null
     private var captureRequestBuilder: CaptureRequest.Builder? = null
     private var cameraCaptureSessions: CameraCaptureSession? = null
-    private val context: Context
-        get() = textureView.context
+    private val reentrantLock = ReentrantLock()
     private val textureListener: TextureView.SurfaceTextureListener = object : EmptyTextureSurfaceListener() {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
             startCamera()
@@ -41,31 +41,31 @@ class CameraEngine private constructor(
     }
     private val stateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
-            //This is called when the camera is open
-
             cameraDevice = camera
-            createCameraPreview()
+            onCameraOpened()
         }
 
         override fun onDisconnected(camera: CameraDevice) {
-            cameraDevice?.close()
+            cameraEngineCallback.cameraDevMessage("stateCallback - onDisconnected")
+            closeCamera()
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
-            cameraDevice?.close()
-            cameraDevice = null
+            cameraEngineCallback.cameraDevMessage("stateCallback - onError, error=$error")
+            closeCamera()
         }
     }
 
+    private val context: Context
+        get() = textureView.context
+
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun onHostCreated() {
-        log("onHostCreated()")
         textureView.surfaceTextureListener = textureListener
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onHostResumed() {
-        log("onHostResumed()")
         startBackgroundThread()
         if (textureView.isAvailable) {
             openCamera()
@@ -76,12 +76,11 @@ class CameraEngine private constructor(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     private fun onHostPaused() {
-        log("onHostPaused()")
+        closeCamera()
         stopBackgroundThread()
     }
 
     private fun startCamera() {
-        log("startCamera()")
         if (cameraEngineCallback.isCameraPermissionGranted()) {
             openCamera()
         } else {
@@ -91,37 +90,46 @@ class CameraEngine private constructor(
 
     @SuppressLint("MissingPermission")
     private fun openCamera() {
-        log("openCamera()")
         val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
-            cameraId = manager.findMainCameraId()
-            val characteristics = manager.getCameraCharacteristics(cameraId!!)
+            val cameraId = manager.findMainCameraId()
+                    ?: throw IllegalAccessError("The camera not found!")
+
+            val characteristics = manager.getCameraCharacteristics(cameraId)
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
             imageDimension = map.getOutputSizes(SurfaceTexture::class.java)[0]
-
-            manager.openCamera(cameraId!!, stateCallback, null)
+            manager.openCamera(cameraId, stateCallback, null)
         } catch (e: CameraAccessException) {
+            cameraEngineCallback.onCameraError(e)
+        } catch (e: IllegalAccessError) {
             cameraEngineCallback.onCameraError(e)
         }
     }
 
-    private fun createCameraPreview() {
+    private fun closeCamera() {
+        runThreadSafely { cameraDevice?.close() }
+    }
+
+    private fun onCameraOpened() {
+        val size = imageDimension
+                ?: throw IllegalStateException("You must init imageDimension!")
+        val camera = cameraDevice
+                ?: throw IllegalStateException("You must open cameraDevice!")
+        createCameraPreview(camera, size)
+    }
+
+    private fun createCameraPreview(cameraDevice: CameraDevice, imageDimension: Size) {
         log("createCameraPreview()")
         try {
-            val texture = textureView.surfaceTexture!!
-            texture.setDefaultBufferSize(imageDimension!!.width, imageDimension!!.height)
-            val surface = Surface(texture)
-            captureRequestBuilder = cameraDevice!!.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            val surface = createSurface(imageDimension)
+            captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             captureRequestBuilder!!.addTarget(surface)
-            cameraDevice!!.createCaptureSession(Arrays.asList(surface), object : CameraCaptureSession.StateCallback() {
+            cameraDevice.createCaptureSession(listOf(surface), object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                    //The camera is already closed
-                    if (null == cameraDevice) {
-                        return
+                    if (isCameraOpened()) {
+                        cameraCaptureSessions = cameraCaptureSession
+                        updatePreview()
                     }
-                    // When the session is ready, we start displaying the preview.
-                    cameraCaptureSessions = cameraCaptureSession
-                    updatePreview()
                 }
 
                 override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
@@ -133,17 +141,18 @@ class CameraEngine private constructor(
         }
     }
 
+    private fun isCameraOpened() = cameraDevice != null
+
     private fun updatePreview() {
-        log("updatePreview()")
-        if (cameraDevice == null) {
-            log("updatePreview error, return")
-            return
-        }
-        captureRequestBuilder?.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
-        try {
-            cameraCaptureSessions?.setRepeatingRequest(captureRequestBuilder!!.build(), null, backgroundHandler)
-        } catch (e: CameraAccessException) {
-            cameraEngineCallback.onCameraError(e)
+        if (isCameraOpened()) {
+            captureRequestBuilder?.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO)
+            try {
+                cameraCaptureSessions?.setRepeatingRequest(captureRequestBuilder!!.build(), null, backgroundHandler)
+            } catch (e: CameraAccessException) {
+                cameraEngineCallback.onCameraError(e)
+            }
+        } else {
+            log("updatePreview() error - camera is closed!")
         }
     }
 
@@ -166,9 +175,26 @@ class CameraEngine private constructor(
         }
     }
 
-    private fun log(msg: String) {
+    private fun createSurface(imageDimension: Size): Surface {
+        val texture = textureView.surfaceTexture!!
+        texture.setDefaultBufferSize(imageDimension.width, imageDimension.height)
+        return Surface(texture)
+    }
+
+    private fun runThreadSafely(action:() -> Unit) {
+        try {
+            reentrantLock.withLock { action() }
+        } catch (e: InterruptedException) {
+            cameraEngineCallback.onCameraError(e)
+            throw RuntimeException("Interrupted!")
+        }
+    }
+
+    private fun log(msg: String, toast: Boolean = true) {
         Log.d("CameraEngine", msg)
-        showToast(msg)
+        if (toast) {
+            showToast(msg)
+        }
     }
 
     private fun showToast(msg: String) =

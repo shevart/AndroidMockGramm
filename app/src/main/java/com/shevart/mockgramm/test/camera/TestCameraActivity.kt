@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.activity_test_camera.*
 
 class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     private lateinit var cameraEngine: CameraEngine
-    
+
     override fun provideLayoutResId() = R.layout.activity_test_camera
 
     override fun onCreate(savedInstanceState: Bundle?) {
