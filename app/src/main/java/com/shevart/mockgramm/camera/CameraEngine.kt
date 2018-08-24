@@ -39,7 +39,7 @@ class CameraEngine private constructor(
 
     private val textureListener: TextureView.SurfaceTextureListener = object : EmptyTextureSurfaceListener() {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-            startCamera()
+            startCameraEngine()
         }
     }
     private val stateCallback = object : CameraDevice.StateCallback() {
@@ -89,7 +89,7 @@ class CameraEngine private constructor(
     private fun startCameraEngine() {
         startBackgroundThread()
         if (textureView.isAvailable) {
-            openCamera()
+            startCamera()
         } else {
             textureView.surfaceTextureListener = textureListener
         }

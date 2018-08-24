@@ -6,11 +6,11 @@ import android.content.pm.PackageManager
 import android.support.v4.content.ContextCompat
 
 object CameraPermission {
-    fun isNeedRequest(context: Context): Boolean {
+    fun isGranted(context: Context): Boolean {
         return if (isRuntimePermissionsRequired()) {
             isCameraPermissionGranted(context)
         } else {
-            false
+            true
         }
     }
 

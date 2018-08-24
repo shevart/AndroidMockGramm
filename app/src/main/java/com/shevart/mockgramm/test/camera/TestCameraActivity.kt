@@ -33,7 +33,7 @@ class TestCameraActivity : BaseActivity(), CameraEngineCallback {
     }
 
     override fun isCameraPermissionGranted(): Boolean =
-            CameraPermission.isNeedRequest(this)
+            CameraPermission.isGranted(this)
 
     override fun requestCameraPermission() {
         rxPermission
