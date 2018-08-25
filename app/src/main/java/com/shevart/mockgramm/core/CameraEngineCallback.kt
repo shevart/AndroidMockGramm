@@ -1,5 +1,7 @@
 package com.shevart.mockgramm.core
 
+import java.io.File
+
 interface CameraEngineCallback {
     fun isCameraPermissionGranted(): Boolean
 
@@ -18,4 +20,6 @@ interface CameraEngineCallback {
     fun onShootPhotoStarted()
 
     fun onShootPhotoFinish()
+
+    fun createFileForNextPhoto(): File
 }

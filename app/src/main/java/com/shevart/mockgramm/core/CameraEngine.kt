@@ -10,7 +10,6 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
-import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -19,7 +18,7 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.core.util.*
-import com.shevart.mockgramm.test.camera.TestCameraActivity
+import com.shevart.mockgramm.util.save
 import java.io.*
 import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
@@ -242,42 +241,17 @@ class CameraEngine private constructor(
             val captureRequest = cameraDevice.createCaptureRequest(reader.surface, rotation)
 
             // Image file
-            val file = File(Environment.getExternalStorageDirectory().toString() + "/pic.jpg")
-            val readerListener = object : ImageReader.OnImageAvailableListener {
-                override fun onImageAvailable(reader: ImageReader) {
-                    var image: Image? = null
-                    try {
-                        image = reader.acquireLatestImage()
-                        val buffer = image!!.planes[0].buffer
-                        val bytes = ByteArray(buffer.capacity())
-                        buffer.get(bytes)
-                        save(bytes)
-                    } catch (e: FileNotFoundException) {
-                        e.printStackTrace()
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    } finally {
-                        image?.close()
-                    }
-                }
-
-                @Throws(IOException::class)
-                private fun save(bytes: ByteArray) {
-                    var output: OutputStream? = null
-                    try {
-                        output = FileOutputStream(file)
-                        output.write(bytes)
-                    } finally {
-                        output?.close()
-                    }
-                }
+            val file = cameraEngineCallback.createFileForNextPhoto()
+            val readerListener = ImageReader.OnImageAvailableListener { imageReader ->
+                imageReader.saveImageToFile(file)
             }
+
             reader.setOnImageAvailableListener(readerListener, backgroundHandler)
             val captureListener = object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
                                                 result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
-                    showDevToast("Saved:$file")
+                    showDevToast("Saved: $file")
                     onCameraShootPhotoFinished()
                     onCameraOpened()
                 }
