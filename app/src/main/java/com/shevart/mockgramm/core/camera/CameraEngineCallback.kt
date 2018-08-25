@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.core
+package com.shevart.mockgramm.core.camera
 
 import java.io.File
 

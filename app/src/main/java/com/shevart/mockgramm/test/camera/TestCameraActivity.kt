@@ -4,8 +4,8 @@ import android.Manifest
 import android.os.Bundle
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseActivity
-import com.shevart.mockgramm.core.CameraEngine
-import com.shevart.mockgramm.core.CameraEngineCallback
+import com.shevart.mockgramm.core.camera.CameraEngine
+import com.shevart.mockgramm.core.camera.CameraEngineCallback
 import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.CameraPermission
 import com.shevart.mockgramm.util.WriteStoragePermission

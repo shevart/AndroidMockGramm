@@ -2,12 +2,11 @@ package com.shevart.mockgramm.screens.camera
 
 import android.Manifest
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseFragment
-import com.shevart.mockgramm.core.CameraEngine
-import com.shevart.mockgramm.core.CameraEngineCallback
+import com.shevart.mockgramm.core.camera.CameraEngine
+import com.shevart.mockgramm.core.camera.CameraEngineCallback
 import com.shevart.mockgramm.core.util.changeCamera
 import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.*

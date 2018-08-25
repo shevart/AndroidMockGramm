@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.core
+package com.shevart.mockgramm.core.camera
 
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
@@ -8,7 +8,6 @@ import android.arch.lifecycle.OnLifecycleEvent
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
 import android.os.HandlerThread
@@ -18,8 +17,6 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.core.util.*
-import com.shevart.mockgramm.util.save
-import java.io.*
 import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock

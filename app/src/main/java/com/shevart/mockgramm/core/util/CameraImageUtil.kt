@@ -6,7 +6,7 @@ import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.media.Image
 import android.media.ImageReader
-import com.shevart.mockgramm.core.CameraConfig
+import com.shevart.mockgramm.core.camera.CameraConfig
 import com.shevart.mockgramm.util.save
 import java.io.File
 import java.io.FileNotFoundException
@@ -17,13 +17,6 @@ fun CameraCharacteristics.getImageSizes(): Pair<Int, Int> {
             ?.getOutputSizes(ImageFormat.JPEG)
     val photoWidth = jpegSizes?.getOrNull(0)?.width ?: CameraConfig.DEFAULT_WIDTH
     val photoHeight = jpegSizes?.getOrNull(1)?.height ?: CameraConfig.DEFAULT_HEIGHT
-
-//        var width = CameraConfig.DEFAULT_WIDTH
-//        var height = CameraConfig.DEFAULT_HEIGHT
-//        if (jpegSizes != null && jpegSizes.isNotEmpty()) {
-//            width = jpegSizes[0].width
-//            height = jpegSizes[0].height
-//        }
 
     return Pair(photoWidth, photoHeight)
 }
