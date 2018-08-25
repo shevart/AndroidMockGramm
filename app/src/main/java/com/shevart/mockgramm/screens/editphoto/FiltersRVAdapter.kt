@@ -9,7 +9,7 @@ import com.shevart.mockgramm.core.imageprocessing.ImageFilter
 import com.shevart.mockgramm.util.inflate
 
 @Suppress("unused")
-// todo add selected/nonselected state views
+// todo add selected/non_selected state views
 class FiltersRVAdapter : BaseRVAdapter<ImageFilter, FiltersRVAdapter.ViewHolder>() {
     companion object {
         const val IMAGE_FILTER_SELECTED_VIEW_TYPE = 1

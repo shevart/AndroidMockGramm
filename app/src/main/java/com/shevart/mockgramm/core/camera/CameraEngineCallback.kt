@@ -22,4 +22,6 @@ interface CameraEngineCallback {
     fun onShootPhotoFinish()
 
     fun createFileForNextPhoto(): File
+
+    fun onPhotoSaved(file: File)
 }

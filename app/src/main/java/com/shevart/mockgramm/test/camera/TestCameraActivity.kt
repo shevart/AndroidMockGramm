@@ -12,8 +12,12 @@ import com.shevart.mockgramm.util.WriteStoragePermission
 import kotlinx.android.synthetic.main.activity_test_camera.*
 import java.io.File
 
-// todo remove str hardcodes
+// todo remove after test
 class TestCameraActivity : BaseActivity(), CameraEngineCallback {
+    override fun onPhotoSaved(file: File) {
+        TODO()
+    }
+
     override fun createFileForNextPhoto(): File {
         TODO()
     }

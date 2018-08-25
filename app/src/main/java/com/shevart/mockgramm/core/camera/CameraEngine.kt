@@ -17,6 +17,7 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.core.util.*
+import java.io.File
 import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -248,7 +249,7 @@ class CameraEngine private constructor(
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
                                                 result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
-                    showDevToast("Saved: $file")
+                    onPhotoSaved(file)
                     onCameraShootPhotoFinished()
                     onCameraOpened()
                 }
@@ -280,6 +281,13 @@ class CameraEngine private constructor(
 
     private fun onCameraShootPhotoFinished() {
         runOnMainThread { cameraEngineCallback.onShootPhotoFinish() }
+    }
+
+    private fun onPhotoSaved(photoFile: File) {
+        runOnMainThread {
+            showDevToast("Saved: $photoFile")
+            cameraEngineCallback.onPhotoSaved(photoFile)
+        }
     }
 
     private fun onCameraShootPhotoFailed(e: Exception) {

@@ -21,13 +21,19 @@ class EditPhotoFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ivBack.setOnClickListener { backByBackButton() }
+
         val bitmap = MediaStore.Images.Media.getBitmap(forceContext.contentResolver, photoUri)
         if (bitmap != null) {
             ivEditedPhoto.setImageBitmap(bitmap)
+        } else {
+            showToast("bitmap is null!")
         }
     }
 
     companion object {
+        const val TAG = "EditPhoto"
+
         fun getInstance(photoUri: Uri): EditPhotoFragment {
             return EditPhotoFragment().apply {
                 arguments = Bundle(1)

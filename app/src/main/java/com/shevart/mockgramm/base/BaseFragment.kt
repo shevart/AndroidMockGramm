@@ -40,6 +40,10 @@ abstract class BaseFragment : Fragment() {
         showToast(e.localizedMessage)
     }
 
+    protected fun backByBackButton() {
+        activity?.onBackPressed()
+    }
+
     protected fun log(msg: String) {
         log(tag = this::class.java.simpleName, msg = msg)
     }
