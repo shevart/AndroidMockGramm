@@ -10,6 +10,7 @@ import com.shevart.mockgramm.base.BaseFragment
 import com.shevart.mockgramm.core.imageprocessing.ImageFilter
 import com.shevart.mockgramm.core.imageprocessing.createImageFiltersList
 import com.shevart.mockgramm.util.getPhotoUri
+import com.shevart.mockgramm.util.openBitmap
 import com.shevart.mockgramm.util.setPhotoUri
 import kotlinx.android.synthetic.main.fragment_edit_photo.*
 import kotlinx.android.synthetic.main.layout_edit_photo_filters.*
@@ -28,7 +29,7 @@ class EditPhotoFragment : BaseFragment() {
 
         ivBack.setOnClickListener { backByBackButton() }
 
-        val bitmap = MediaStore.Images.Media.getBitmap(forceContext.contentResolver, photoUri)
+        val bitmap = photoUri.openBitmap(forceContext)
         if (bitmap != null) {
             ivEditedPhoto.setImageBitmap(bitmap)
         } else {

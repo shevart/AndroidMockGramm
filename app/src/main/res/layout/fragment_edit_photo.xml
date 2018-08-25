@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:src="@drawable/ic_navigate_black"
+        android:background="?selectableItemBackground"
+        android:src="@drawable/ic_arrow_back_black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
