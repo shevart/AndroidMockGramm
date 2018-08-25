@@ -31,7 +31,7 @@
         app:layout_constraintTop_toTopOf="@+id/ivBack" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/ivEditedPhoto"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="32dp"
