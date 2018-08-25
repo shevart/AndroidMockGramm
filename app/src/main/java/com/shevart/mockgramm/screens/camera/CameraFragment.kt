@@ -2,6 +2,7 @@ package com.shevart.mockgramm.screens.camera
 
 import android.Manifest
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseFragment
@@ -12,6 +13,7 @@ import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.*
 import kotlinx.android.synthetic.main.activity_test_camera.*
 import kotlinx.android.synthetic.main.layout_camera_dashboard.*
+import java.io.File
 
 class CameraFragment : BaseFragment(), CameraEngineCallback {
     private lateinit var cameraEngine: CameraEngine
@@ -70,6 +72,10 @@ class CameraFragment : BaseFragment(), CameraEngineCallback {
     override fun onShootPhotoFinish() {
         pbShootingProgress.gone()
         ibShoot.enable()
+    }
+
+    override fun createFileForNextPhoto(): File {
+        return createPhotoFile("/pic.jpg")
     }
 
     // todo update camera?

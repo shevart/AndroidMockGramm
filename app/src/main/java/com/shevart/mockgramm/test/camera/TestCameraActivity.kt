@@ -10,9 +10,14 @@ import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.CameraPermission
 import com.shevart.mockgramm.util.WriteStoragePermission
 import kotlinx.android.synthetic.main.activity_test_camera.*
+import java.io.File
 
 // todo remove str hardcodes
 class TestCameraActivity : BaseActivity(), CameraEngineCallback {
+    override fun createFileForNextPhoto(): File {
+        TODO()
+    }
+
     override fun onShootPhotoStarted() {
         TODO()
     }
