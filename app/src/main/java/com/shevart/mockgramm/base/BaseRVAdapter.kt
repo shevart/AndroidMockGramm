@@ -8,7 +8,7 @@ abstract class BaseRVAdapter<M, VH : RecyclerView.ViewHolder> : RecyclerView.Ada
 
     override fun getItemCount() = items.size
 
-    protected fun updateItems(items: List<M>) {
+    fun updateItems(items: List<M>) {
         this.items.clear()
         this.items.addAll(items)
         notifyDataSetChanged()

@@ -226,7 +226,7 @@ class CameraEngine private constructor(
     // todo refactor!
     private fun takePicture(cameraDevice: CameraDevice) {
         if (!isCameraOpened()) {
-            log("cameraDevice is null")
+            log("cameraDevice is null!")
             return
         }
         try {

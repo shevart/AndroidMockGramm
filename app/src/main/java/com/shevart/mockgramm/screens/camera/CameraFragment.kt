@@ -77,7 +77,7 @@ class CameraFragment : BaseFragment(), CameraEngineCallback {
     }
 
     override fun createFileForNextPhoto(): File {
-        return createPhotoFile("/pic.jpg") // todo replace image name
+        return createPhotoFile("/photo.jpg") // todo replace image name
     }
 
     override fun onPhotoSaved(file: File) {

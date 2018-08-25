@@ -3,6 +3,7 @@ package com.shevart.mockgramm.screens.editphoto
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseRVAdapter
 import com.shevart.mockgramm.core.imageprocessing.ImageFilter
@@ -20,9 +21,13 @@ class FiltersRVAdapter : BaseRVAdapter<ImageFilter, FiltersRVAdapter.ViewHolder>
         return ViewHolder(inflate(parent, R.layout.item_image_filter))
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, viewType: Int) {
-        // todo
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val item = getItem(position)
+        viewHolder.ivFilterCover.setImageResource(item.filterCoverResId)
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val ivFilterCover: ImageView = itemView.findViewById(R.id.ivFilterCover)
+
+    }
 }
