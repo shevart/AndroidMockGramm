@@ -14,5 +14,5 @@ abstract class BaseRVAdapter<M, VH : RecyclerView.ViewHolder> : RecyclerView.Ada
         notifyDataSetChanged()
     }
 
-    protected fun getItem(index: Int) = items.get(index)
+    protected fun getItem(index: Int) = items[index]
 }

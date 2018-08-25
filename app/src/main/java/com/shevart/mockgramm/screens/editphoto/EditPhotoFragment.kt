@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseFragment
+import com.shevart.mockgramm.core.imageprocessing.ImageFilter
 import com.shevart.mockgramm.core.imageprocessing.createImageFiltersList
 import com.shevart.mockgramm.util.getPhotoUri
 import com.shevart.mockgramm.util.setPhotoUri
@@ -36,6 +37,11 @@ class EditPhotoFragment : BaseFragment() {
 
         adapter = FiltersRVAdapter()
         adapter.updateItems(createImageFiltersList())
+        adapter.listener = object : FiltersRVAdapter.FiltersListListener {
+            override fun onFilterSelected(filter: ImageFilter) {
+                showToast("Filter selected: $filter")
+            }
+        }
         rvFilters.layoutManager = LinearLayoutManager(forceContext, LinearLayoutManager.HORIZONTAL, false)
         rvFilters.adapter = adapter
     }
