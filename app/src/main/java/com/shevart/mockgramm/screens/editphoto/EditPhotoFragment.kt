@@ -2,7 +2,6 @@ package com.shevart.mockgramm.screens.editphoto
 
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.shevart.mockgramm.R
@@ -43,7 +42,8 @@ class EditPhotoFragment : BaseFragment() {
                 showToast("Filter selected: $filter")
             }
         }
-        rvFilters.layoutManager = LinearLayoutManager(forceContext, LinearLayoutManager.HORIZONTAL, false)
+        rvFilters.layoutManager = LinearLayoutManager(forceContext,
+                LinearLayoutManager.HORIZONTAL, false)
         rvFilters.adapter = adapter
     }
 

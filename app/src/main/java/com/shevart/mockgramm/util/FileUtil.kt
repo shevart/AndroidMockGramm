@@ -24,4 +24,4 @@ fun File.save(bytes: ByteArray) {
     }
 }
 
-fun File.toUri() = Uri.fromFile(this)
+fun File.toUri() = Uri.fromFile(this)!!
