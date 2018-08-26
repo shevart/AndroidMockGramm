@@ -1,13 +1,13 @@
 package com.shevart.mockgramm.screens.camera
 
 import android.Manifest
+import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseFragment
-import com.shevart.mockgramm.core.CameraEngine
-import com.shevart.mockgramm.core.CameraEngineCallback
+import com.shevart.mockgramm.core.camera.CameraEngine
+import com.shevart.mockgramm.core.camera.CameraEngineCallback
 import com.shevart.mockgramm.core.util.changeCamera
 import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.*
@@ -17,6 +17,8 @@ import java.io.File
 
 class CameraFragment : BaseFragment(), CameraEngineCallback {
     private lateinit var cameraEngine: CameraEngine
+    private val cameraScreenNavigator: CameraScreenNavigator
+        get() = activity as CameraScreenNavigator
 
     override fun provideLayoutResId() = R.layout.fragment_camera
 
@@ -75,17 +77,19 @@ class CameraFragment : BaseFragment(), CameraEngineCallback {
     }
 
     override fun createFileForNextPhoto(): File {
-        return createPhotoFile("/pic.jpg")
+        return createPhotoFile("/photo.jpg") // todo replace image name
     }
 
-    // todo update camera?
+    override fun onPhotoSaved(file: File) {
+        cameraScreenNavigator.openPhoto(file.toUri())
+    }
+
     private fun onCameraRequestPermissionResult(granted: Boolean) {
         if (!granted) {
             onPermissionNotGranted()
         }
     }
 
-    // todo update camera?
     private fun onWriteStorageRequestPermissionResult(granted: Boolean) {
         if (!granted) {
             onPermissionNotGranted()

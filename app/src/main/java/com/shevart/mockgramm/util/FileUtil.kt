@@ -1,5 +1,6 @@
 package com.shevart.mockgramm.util
 
+import android.net.Uri
 import android.os.Environment
 import java.io.File
 import java.io.FileOutputStream
@@ -22,3 +23,5 @@ fun File.save(bytes: ByteArray) {
         output?.close()
     }
 }
+
+fun File.toUri() = Uri.fromFile(this)!!

@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.core
+package com.shevart.mockgramm.core.camera
 
 import java.io.File
 
@@ -22,4 +22,6 @@ interface CameraEngineCallback {
     fun onShootPhotoFinish()
 
     fun createFileForNextPhoto(): File
+
+    fun onPhotoSaved(file: File)
 }

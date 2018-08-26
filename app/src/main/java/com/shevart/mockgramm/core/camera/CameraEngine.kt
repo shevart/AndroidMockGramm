@@ -1,4 +1,4 @@
-package com.shevart.mockgramm.core
+package com.shevart.mockgramm.core.camera
 
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
@@ -8,7 +8,6 @@ import android.arch.lifecycle.OnLifecycleEvent
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
 import android.os.HandlerThread
@@ -18,8 +17,7 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import com.shevart.mockgramm.core.util.*
-import com.shevart.mockgramm.util.save
-import java.io.*
+import java.io.File
 import java.util.ArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -228,7 +226,7 @@ class CameraEngine private constructor(
     // todo refactor!
     private fun takePicture(cameraDevice: CameraDevice) {
         if (!isCameraOpened()) {
-            log("cameraDevice is null")
+            log("cameraDevice is null!")
             return
         }
         try {
@@ -251,7 +249,7 @@ class CameraEngine private constructor(
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
                                                 result: TotalCaptureResult) {
                     super.onCaptureCompleted(session, request, result)
-                    showDevToast("Saved: $file")
+                    onPhotoSaved(file)
                     onCameraShootPhotoFinished()
                     onCameraOpened()
                 }
@@ -283,6 +281,13 @@ class CameraEngine private constructor(
 
     private fun onCameraShootPhotoFinished() {
         runOnMainThread { cameraEngineCallback.onShootPhotoFinish() }
+    }
+
+    private fun onPhotoSaved(photoFile: File) {
+        runOnMainThread {
+            showDevToast("Saved: $photoFile")
+            cameraEngineCallback.onPhotoSaved(photoFile)
+        }
     }
 
     private fun onCameraShootPhotoFailed(e: Exception) {
