@@ -2,11 +2,13 @@ package com.shevart.mockgramm.screens.editphoto
 
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.shevart.mockgramm.R
 import com.shevart.mockgramm.base.BaseFragment
 import com.shevart.mockgramm.core.imageprocessing.ImageFilter
+import com.shevart.mockgramm.core.imageprocessing.changeBitmapColor
 import com.shevart.mockgramm.core.imageprocessing.createImageFiltersList
 import com.shevart.mockgramm.util.getPhotoUri
 import com.shevart.mockgramm.util.openBitmap
@@ -31,6 +33,8 @@ class EditPhotoFragment : BaseFragment() {
         val bitmap = photoUri.openBitmap(forceContext)
         if (bitmap != null) {
             ivEditedPhoto.setImageBitmap(bitmap)
+            changeBitmapColor(bitmap, ivEditedPhoto, ContextCompat.getColor(forceContext, R.color.filter_blue))
+
         } else {
             showToast("bitmap is null!")
         }

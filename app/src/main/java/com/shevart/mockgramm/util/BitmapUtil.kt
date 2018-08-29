@@ -11,3 +11,6 @@ import java.io.IOException
 fun Uri.openBitmap(context: Context): Bitmap? {
     return MediaStore.Images.Media.getBitmap(context.contentResolver, this)
 }
+
+fun Bitmap.copyBitmap() =
+        Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)

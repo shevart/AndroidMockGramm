@@ -1,7 +1,6 @@
 package com.shevart.mockgramm.screens.camera
 
 import android.Manifest
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import com.shevart.mockgramm.R
@@ -11,7 +10,7 @@ import com.shevart.mockgramm.core.camera.CameraEngineCallback
 import com.shevart.mockgramm.core.util.changeCamera
 import com.shevart.mockgramm.core.util.provideScreenRotation
 import com.shevart.mockgramm.util.*
-import kotlinx.android.synthetic.main.activity_test_camera.*
+import kotlinx.android.synthetic.main.fragment_camera.*
 import kotlinx.android.synthetic.main.layout_camera_dashboard.*
 import java.io.File
 
